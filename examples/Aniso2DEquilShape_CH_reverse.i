@@ -141,7 +141,7 @@
     constant_expressions = '0.001'
     args = 'dcx dcy'
     #function = 'if(time > 5, kappa0 * aniso_m4, kappa0)'
-    function = 'kappa0 * (1 + eps4 * (dcx^4 + dcy^4)/(dcx^2 + dcy^2 + e^2)^2)'
+    function = 'kappa0 * (1 + eps4 * (dcx^4 + dcy^4)/(dcx^2 + dcy^2 + ed^2)^2)'
     derivative_order = 2
     outputs = exodus
   [../]
@@ -154,7 +154,7 @@
     constant_names = 'e ed'
     constant_expressions = '0.01 0.001'
     args = 'c dcx dcy'
-    function = 'w0 * (sqrt(c^2+e^2)-e)*(sqrt((1-c)^2+e^2)-e) * (1 + eps4 * (dcx^4 + dcy^4)/(dcx^2 + dcy^2 + e^2)^2)'
+    function = 'w0 * (sqrt(c^2+e^2)-e)*(sqrt((1-c)^2+e^2)-e) * (1 + eps4 * (dcx^4 + dcy^4)/(dcx^2 + dcy^2 + ed^2)^2)'
     derivative_order = 2
     outputs = exodus
   [../]
