@@ -137,7 +137,7 @@
     f_name = kappa_aniso_m4
     # eps4 is the anisotropy strength
     material_property_names = 'kappa0 eps4'
-    constant_names = 'e'
+    constant_names = 'ed'
     constant_expressions = '0.001'
     args = 'dcx dcy'
     #function = 'if(time > 5, kappa0 * aniso_m4, kappa0)'
@@ -151,8 +151,8 @@
     f_name = f_aniso_m4
     # eps4 is the anisotropy strength
     material_property_names = 'w0 eps4'
-    constant_names = 'e'
-    constant_expressions = '0.01'
+    constant_names = 'e ed'
+    constant_expressions = '0.01 0.001'
     args = 'c dcx dcy'
     function = 'w0 * (sqrt(c^2+e^2)-e)*(sqrt((1-c)^2+e^2)-e) * (1 + eps4 * (dcx^4 + dcy^4)/(dcx^2 + dcy^2 + e^2)^2)'
     derivative_order = 2
