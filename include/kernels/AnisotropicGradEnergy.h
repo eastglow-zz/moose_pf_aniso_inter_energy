@@ -31,7 +31,6 @@ protected:
   RealGradient get_dargv_darg(unsigned int cvar);
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   const unsigned int _nvar;
   /// Phase-field mobility (assumed to be constant)

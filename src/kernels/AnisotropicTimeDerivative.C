@@ -60,7 +60,7 @@ AnisotropicTimeDerivative::computeQpResidual()
 Real
 AnisotropicTimeDerivative::computeQpJacobian()
 {
-  if (_nvar > 0 && _grad_u[_qp] * _grad_u[_qp] > _gradmag_threshold * _gradmag_threshold)
+  if (_nvar > 0 && sqrt(_grad_u[_qp] * _grad_u[_qp]) > _gradmag_threshold)
   {
     Real dtau_du = 0;
     for (unsigned int i = 0; i < _nvar; i++)
@@ -70,18 +70,6 @@ AnisotropicTimeDerivative::computeQpJacobian()
     return (dtau_du * _u_dot[_qp] + _du_dot_du[_qp] * _tau[_qp]) * _test[_i][_qp];
   }else{
     return (_du_dot_du[_qp] * _tau[_qp]) * _test[_i][_qp];
-  }
-}
-
-Real
-AnisotropicTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
-{
-  if (0)
-  {
-    const unsigned int cvar = mapJvarToCvar(jvar);
-    return _test[_i][_qp] * _u_dot[_qp] * (*_dtau_darg[cvar])[_qp] * _phi[_j][_qp];
-  }else{
-    return 0;
   }
 }
 

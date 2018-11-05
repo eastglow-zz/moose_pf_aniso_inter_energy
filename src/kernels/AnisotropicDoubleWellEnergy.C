@@ -131,7 +131,7 @@ Real
 AnisotropicDoubleWellEnergy::computeQpResidual()
 {
   Real grad_u_sq = _grad_u[_qp] * _grad_u[_qp];
-  if (_nvar > 0 && grad_u_sq > _gradmag_threshold * _gradmag_threshold)
+  if (_nvar > 0 && sqrt(grad_u_sq) > _gradmag_threshold)
   {
     RealGradient dfbulk_dgradaeta = get_dfbulk_darg(_qp);
     Real dfbulk_dgradaeta_dot_grad_test = dfbulk_dgradaeta * _grad_test[_i][_qp];
@@ -146,7 +146,7 @@ Real
 AnisotropicDoubleWellEnergy::computeQpJacobian()
 {
   Real grad_u_sq = _grad_u[_qp] * _grad_u[_qp];
-  if (_nvar > 0 && grad_u_sq > _gradmag_threshold * _gradmag_threshold)
+  if (_nvar > 0 && sqrt(grad_u_sq) > _gradmag_threshold)
   {
     Real d2fbulk_dgradaeta2_dot_grad_phi_dot_grad_test = 0.0;
     for (unsigned int i = 0; i < _nvar; ++i)

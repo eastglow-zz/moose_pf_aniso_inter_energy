@@ -157,7 +157,7 @@ AnisotropicGradEnergy::computeQpResidual()
 {
   Real grad_u_sq = _grad_u[_qp] * _grad_u[_qp];
   Real grad_u_dot_grad_test = _grad_u[_qp] * _grad_test[_i][_qp];
-  if (_nvar > 0 && grad_u_sq > _gradmag_threshold * _gradmag_threshold)
+  if (_nvar > 0 && sqrt(grad_u_sq) > _gradmag_threshold)
   {
     RealGradient dkappa_dgradaeta = get_dkappa_darg(_qp);
     Real dkappa_dgradaeta_dot_grad_test = dkappa_dgradaeta * _grad_test[_i][_qp];
@@ -174,7 +174,7 @@ AnisotropicGradEnergy::computeQpJacobian()
 
   Real grad_u_sq = _grad_u[_qp] * _grad_u[_qp];
   Real kappa_gradphi_dot_grad_test = _kappa[_qp] * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
-  if (_nvar > 0 && grad_u_sq > _gradmag_threshold * _gradmag_threshold)
+  if (_nvar > 0 && sqrt(grad_u_sq) > _gradmag_threshold)
   {
     RealGradient dkappa_dgradaeta = get_dkappa_darg(_qp);
     Real dkappa_dgradaeta_dot_grad_phi = dkappa_dgradaeta * _grad_phi[_j][_qp];
@@ -196,28 +196,5 @@ AnisotropicGradEnergy::computeQpJacobian()
                      + 0.5 * grad_u_sq * d2kappa_dgradaeta2_dot_grad_phi_dot_grad_test);
   }else{
     return _L[_qp] * kappa_gradphi_dot_grad_test;
-  }
-}
-
-
-Real
-AnisotropicGradEnergy::computeQpOffDiagJacobian(unsigned int jvar)
-{
-  if (0)
-  {
-    // get the coupled variable jvar is referring to
-    const unsigned int cvar = mapJvarToCvar(jvar);
-    Real grad_u_sq = _grad_u[_qp] * _grad_u[_qp];
-    Real xcvar_dot_grad_test = get_dargv_darg(cvar) * _grad_test[_i][_qp];
-    Real grad_u_dot_grad_test = _grad_u[_qp] * _grad_test[_i][_qp];
-    Real dkappa_dgradaeta_dot_grad_test = get_dkappa_darg(_qp) * _grad_test[_i][_qp];
-    Real d2kappa_dgradaeta_dcvar_dot_grad_test = get_d2kappa_darg2(cvar, _qp) * _grad_test[_i][_qp];
-    return _L[_qp] * _phi[_j][_qp] * ((*_dkappa_darg[cvar])[_qp] * grad_u_dot_grad_test \
-                      + _kappa[_qp] * xcvar_dot_grad_test \
-                      + _grad_u[_qp](cvar) * dkappa_dgradaeta_dot_grad_test \
-                      + 0.5 * grad_u_sq * d2kappa_dgradaeta_dcvar_dot_grad_test);
-  }else{
-    //return _L[_qp] * _phi[_j][_qp] * _kappa[_qp] * xcvar_dot_grad_test;
-    return 0;
   }
 }
