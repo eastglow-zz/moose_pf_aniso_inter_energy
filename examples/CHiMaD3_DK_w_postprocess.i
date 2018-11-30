@@ -12,6 +12,7 @@
   ny = 75
   xmax = 960
   ymax = 960
+  # uniform_refine = 2
 []
 
 [Variables]
@@ -34,11 +35,11 @@
     order = FIRST
     family = MONOMIAL
   [../]
-
-  [./FEdensity]
-    order = FIRST
-    family = MONOMIAL
-  [../]
+  #
+  # [./FEdensity]
+  #   order = FIRST
+  #   family = MONOMIAL
+  # [../]
 []
 
 [ICs]
@@ -88,7 +89,7 @@
     variable = p
     tau_name = tau_aniso
     gradient_component_names = 'dpx dpy'
-    gradmag_threshold = 1e-4
+    # gradmag_threshold = 1e-4
   [../]
   [./InterfacialE]
     type = AnisotropicGradEnergy
@@ -96,7 +97,7 @@
     mob_name = L
     kappa_name = Wsq_aniso
     gradient_component_names = 'dpx dpy'
-    gradmag_threshold = 1e-4
+    # gradmag_threshold = 1e-4
   [../]
   [./localFE]
     type = AllenCahn
@@ -231,21 +232,21 @@
   #   #outputs = exodus
   # [../]
 
-  #For the postprocess
-  [./solid_volume]
-    type = ParsedMaterial
-    f_name = solid_fraction_per_element
-    args = 'p'
-    function = '(1 + p)/2/960/960'
-  [../]
-  [./FEdensity_material]
-    type = ParsedMaterial
-    f_name = f_density
-    material_property_names = 'Wsq_aniso f_doublewell lambda_U h'
-    args = 'p u dpx dpy'
-    function = '0.5*Wsq_aniso*(dpx^2+dpy^2) + f_doublewell + lambda_U*h'
-    #outputs = exodus
-  [../]
+  # #For the postprocess
+  # [./solid_volume]
+  #   type = ParsedMaterial
+  #   f_name = solid_fraction_per_element
+  #   args = 'p'
+  #   function = '(1 + p)/2/960/960'
+  # [../]
+  # [./FEdensity_material]
+  #   type = ParsedMaterial
+  #   f_name = f_density
+  #   material_property_names = 'Wsq_aniso f_doublewell lambda_U h'
+  #   args = 'p u dpx dpy'
+  #   function = '0.5*Wsq_aniso*(dpx^2+dpy^2) + f_doublewell + lambda_U*h'
+  #   #outputs = exodus
+  # [../]
 []
 
 [Preconditioning]
@@ -281,17 +282,17 @@
     dt = 0.003
     growth_factor = 1.2
     cutback_factor = 0.8
-    #optimal_iterations = 4
-    #iteration_window = 4
+    # optimal_iterations = 4
+    # iteration_window = 4
   [../]
   dtmax = 0.3
   end_time = 1500
 
   [./Adaptivity]
-    initial_adaptivity = 5
+    initial_adaptivity = 4
     max_h_level = 5
-    refine_fraction = 0.95
-    coarsen_fraction = 0.10
+    refine_fraction = 0.99
+    coarsen_fraction = 0.05
     weight_names = 'p u'
     weight_values = '1.0 1.0'
   [../]
@@ -299,30 +300,31 @@
 
 [Outputs]
   exodus = true
-  csv = true
+  # csv = true
   print_perf_log = true
+  # interval = 500
 []
 
 # [Debug]
 #  show_var_residual_norms = true
 # []
 
-[Postprocessors]
-  [./Total_solid_fraction]
-    type = ElementIntegralMaterialProperty
-    mat_prop = solid_fraction_per_element
-  [../]
-  [./Total_FE]
-    type = ElementIntegralMaterialProperty
-    mat_prop = f_density
-  [../]
-  [./Interface_location_along_x_axis]
-    type = FindValueOnLine
-    start_point = '0 0 0'
-    end_point = '960 0 0'
-    target = 0
-    depth = 15
-    tol = 1e-1
-    v = p
-  [../]
-[]
+# [Postprocessors]
+#   [./Total_solid_fraction]
+#     type = ElementIntegralMaterialProperty
+#     mat_prop = solid_fraction_per_element
+#   [../]
+#   [./Total_FE]
+#     type = ElementIntegralMaterialProperty
+#     mat_prop = f_density
+#   [../]
+#   [./Interface_location_along_x_axis]
+#     type = FindValueOnLine
+#     start_point = '0 0 0'
+#     end_point = '960 0 0'
+#     target = 0
+#     depth = 15
+#     tol = 1e-1
+#     v = p
+#   [../]
+# []

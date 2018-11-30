@@ -1,17 +1,20 @@
 
-#Reverse split method
+# Cahn-Hilliard equation with the reverse split method
+# The lower order double-well function was used: sqrt(c^2+e^2)*sqrt((1-c)^2+e^2), which is smoote version of |c|*|1-c|,
+# where e is small number. e = 0.01 is recommended.
+# Calculates 3D equilibrium shape with an anisotropic interfacial energy
+# 4-fold symmetry anisotropic interfacial energy was implemented as an example;
+# ref: Eq. (97) of Phys. Rev. E, 57 (1998) 4323
 
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  nx = 25
-  ny = 25
+  dim = 3
+  nx = 10
+  ny = 10
+  nz = 10
   xmax = 100
   ymax = 100
-  #type = FileMesh
-  #file = notch.msh
-  elem_type = QUAD4
-  #elem_type = TRI3
+  zmax = 100
 []
 
 [Variables]
@@ -31,6 +34,10 @@
     family = MONOMIAL
   [../]
   [./dcy]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./dcz]
     order = FIRST
     family = MONOMIAL
   [../]
@@ -58,15 +65,23 @@
     component = y
     execute_on = LINEAR
   [../]
+  [./get_dcz]
+    type = VariableGradientComponent
+    variable = dcz
+    gradient_variable = c
+    component = z
+    execute_on = LINEAR
+  [../]
 []
 
 [ICs]
   [./c_circle]
     type = SmoothCircleIC
     variable = c
-    x1 = 50
-    y1 = 50
-    radius = 20
+    x1 = 0
+    y1 = 0
+    z1 = 0
+    radius = 40
     int_width = 2
     invalue = 1
     outvalue = 0
@@ -90,16 +105,16 @@
     type = AnisotropicDoubleWellEnergy
     variable = c
     mob_name = One
-    # fbulk_name = f_aniso_m4
-    # gradient_component_names = 'dcx dcy'
-    fbulk_name = f_iso
+    fbulk_name = f_aniso_m4
+    gradient_component_names = 'dcx dcy dcz'
+    # fbulk_name = f_iso
   [../]
   [./Rc_aniso_interfacialE]
     type = AnisotropicGradEnergy
     variable = c
     mob_name = One
-    kappa_name = kappa_aniso
-    gradient_component_names = 'dcx dcy'
+    kappa_name = kappa_aniso_m4
+    gradient_component_names = 'dcx dcy dcz'
     # kappa_name = kappa_iso
   [../]
 
@@ -121,69 +136,35 @@
 [Materials]
   [./Constants]
     type = GenericConstantMaterial
-    prop_names =  'One M kappa0 w0 anisostr'
-    prop_values = '1   1 2      1  0.5'
+    # eps4 is the anisotropy strength
+    prop_names =  'One M kappa0 w0   eps4'
+    prop_values = '1   1 4      1    0.4'
   [../]
 
-  [./kappa_aniso]
+  [./kappa_aniso_m4]
     type = DerivativeParsedMaterial
-    f_name = kappa_aniso
-    material_property_names = 'kappa0 aniso_m2(dcx,dcy)'
-    args = 'dcx dcy'
-    #function = 'if(time > 5, kappa0 * aniso_m4, kappa0)'
-    function = 'kappa0 * aniso_m2'
+    f_name = kappa_aniso_m4
+    # eps4 is the anisotropy strength
+    material_property_names = 'kappa0 eps4'
+    constant_names = 'e'
+    constant_expressions = '0.01'
+    args = 'dcx dcy dcz'
+    function = 'kappa0 * (1 + eps4 * (dcx^4 + dcy^4 + dcz^4)/(dcx^2 + dcy^2 + dcz^2 + e^2)^2)'
     derivative_order = 2
     outputs = exodus
   [../]
 
-  [./f_aniso]
+  [./f_aniso_m4]
     type = DerivativeParsedMaterial
-    f_name = f_aniso
-    material_property_names = 'w0 doublewell(c) aniso_m4(dcx,dcy)'
-    args = 'c dcx dcy'
-    #function = 'if(time > 5, w0 * (sqrt(c^2+e^2)-e)*(sqrt((1-c)^2+e^2)-e) * aniso_m4, w0 * (sqrt(c^2+e^2)-e)*(sqrt((1-c)^2+e^2)-e))'
-    function = 'w0 * doublewell * aniso_m4'
-    #function = 'w0 * c^2*(1-c)^2 * (1 + eps4 * (dcx^4 + dcy^4)/(dcx^2 + dcy^2 + e^2)^2)^2'
-    derivative_order = 2
-    # outputs = exodus
-  [../]
-
-  [./aniso_m2]
-    type = DerivativeParsedMaterial
-    f_name = aniso_m2
-    material_property_names = 'anisostr'
+    f_name = f_aniso_m4
+    # eps4 is the anisotropy strength
+    material_property_names = 'w0 eps4'
     constant_names = 'e'
     constant_expressions = '0.01'
-    args = 'dcx dcy'
-    #function = 'if(sqrt(dcx^2 + dcy^2) > 1e-5, (1 + eps4 * (dcx^4 + dcy^4 - 6*dcx^2*dcy^2)/(dcx^2 + dcy^2 + e^2)^2)^2, 1)'
-    #function = '(1 + eps4 * (dcx^4 + dcy^4 - 6*dcx^2*dcy^2)/(dcx^2 + dcy^2 + e^2)^2)^2'
-    function = '(1 + anisostr * (dcx^2 - dcy^2)/(dcx^2 + dcy^2 + e^2))^2'
+    args = 'c dcx dcy dcz'
+    function = 'w0 * (sqrt(c^2+e^2)-e)*(sqrt((1-c)^2+e^2)-e) * (1 + eps4 * (dcx^4 + dcy^4 + dcz^4)/(dcx^2 + dcy^2 + dcz^2 + e^2)^2)'
     derivative_order = 2
-    # outputs = exodus
-  [../]
-
-  [./aniso_m4]
-    type = DerivativeParsedMaterial
-    f_name = aniso_m4
-    material_property_names = 'anisostr'
-    constant_names = 'e'
-    constant_expressions = '0.01'
-    args = 'dcx dcy'
-    #function = 'if(sqrt(dcx^2 + dcy^2) > 1e-5, (1 + eps4 * (dcx^4 + dcy^4 - 6*dcx^2*dcy^2)/(dcx^2 + dcy^2 + e^2)^2)^2, 1)'
-    #function = '(1 + eps4 * (dcx^4 + dcy^4 - 6*dcx^2*dcy^2)/(dcx^2 + dcy^2 + e^2)^2)^2'
-    function = '(1 + anisostr * (dcx^4 + dcy^4)/(dcx^2 + dcy^2 + e^2)^2)^2'
-    derivative_order = 2
-    # outputs = exodus
-  [../]
-
-  [./doublewell]
-    type = DerivativeParsedMaterial
-    f_name = doublewell
-    constant_names = 'e'
-    constant_expressions = '0.01'
-    args = 'c'
-    function = '(sqrt(c^2+e^2)-e)*(sqrt((1-c)^2+e^2)-e)'
-    derivative_order = 2
+    outputs = exodus
   [../]
 
   [./kappa_iso]
@@ -197,9 +178,11 @@
   [./f_iso]
     type = DerivativeParsedMaterial
     f_name = f_iso
-    material_property_names = 'w0 doublewell(c)'
+    material_property_names = 'w0'
+    constant_names = 'e'
+    constant_expressions = '0.01'
     args = 'c'
-    function = 'w0 * doublewell'  # smoothed version of w0*|c|*|1-c|
+    function = 'w0 * (sqrt(c^2+e^2)-e)*(sqrt((1-c)^2+e^2)-e)'  # smoothed version of w0*|c|*|1-c|
     derivative_order = 2
   [../]
 
@@ -231,16 +214,15 @@
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-11
 
-  steady_state_detection = true
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 0.005
     growth_factor = 1.2
-    cutback_factor = 0.1
+    cutback_factor = 0.8
     #optimal_iterations = 4
     #iteration_window = 4
   [../]
-  # dtmax = 1
+  end_time = 1e6
 
   [./Adaptivity]
     initial_adaptivity = 3
