@@ -122,16 +122,16 @@
   [./Constants]
     type = GenericConstantMaterial
     prop_names =  'One M kappa0 w0 anisostr'
-    prop_values = '1   1 2      1  0.5'
+    prop_values = '1   1 2      1  0.25'
   [../]
 
   [./kappa_aniso]
     type = DerivativeParsedMaterial
     f_name = kappa_aniso
-    material_property_names = 'kappa0 aniso_m2(dcx,dcy)'
+    material_property_names = 'kappa0 aniso_m4(dcx,dcy)'
     args = 'dcx dcy'
     #function = 'if(time > 5, kappa0 * aniso_m4, kappa0)'
-    function = 'kappa0 * aniso_m2'
+    function = 'kappa0 * aniso_m4'
     derivative_order = 2
     outputs = exodus
   [../]
